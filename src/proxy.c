@@ -28,7 +28,11 @@ void forward(SSL *ssl_socket, int socket_fd)
                         break;
                 }
 
-                if (fds[0].revents & POLLIN) {
+                if (fds[0].revents & (POLLIN | POLLHUP | POLLERR)) {
+
+                        if (!(fds[0].revents & POLLIN))
+                                break;
+
                         bytes_read = SSL_read(ssl_socket, buffer, BUFFER_SIZE);
 
                         if (bytes_read <= 0)
@@ -37,7 +41,11 @@ void forward(SSL *ssl_socket, int socket_fd)
                         write(socket_fd, buffer, bytes_read);
                 }
 
-                if (fds[1].revents & POLLIN) {
+                if (fds[1].revents & (POLLIN | POLLHUP | POLLERR)) {
+
+                        if (!(fds[1].revents & POLLIN))
+                                break;
+
                         bytes_read = read(socket_fd, buffer, BUFFER_SIZE);
 
                         if (bytes_read <= 0)
