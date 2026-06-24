@@ -10,6 +10,8 @@ void forward(SSL *ssl_socket, int socket_fd)
         char buffer[BUFFER_SIZE + 1];
         int ret;
         int bytes_read;
+        int written;
+        int tot_written;
 
         fds[0].fd = SSL_get_fd(ssl_socket);
         fds[0].events = POLLIN;
@@ -38,7 +40,15 @@ void forward(SSL *ssl_socket, int socket_fd)
                         if (bytes_read <= 0)
                                 break;
 
-                        write(socket_fd, buffer, bytes_read);
+                        tot_written = 0;
+                        while (tot_written < bytes_read) {
+                                written = write(socket_fd, buffer + tot_written, bytes_read - tot_written);
+                                if (written <= 0){
+                                        perror("[!] Error: write() failed.\n");
+                                        return;
+                                }
+                                tot_written += written;
+                        }
                 }
 
                 if (fds[1].revents & (POLLIN | POLLHUP | POLLERR)) {
@@ -51,7 +61,15 @@ void forward(SSL *ssl_socket, int socket_fd)
                         if (bytes_read <= 0)
                                 break;
 
-                        SSL_write(ssl_socket, buffer, bytes_read);
+                        tot_written = 0;
+                        while (tot_written < bytes_read) {
+                                written = SSL_write(ssl_socket, buffer + tot_written, bytes_read - tot_written);
+                                if (written <= 0){
+                                        perror("[!] Error: write() failed.\n");
+                                        return;
+                                }
+                                tot_written += written;
+                        }
                 }
         }
 }
