@@ -17,10 +17,16 @@ void forward(SSL *ssl_socket, int socket_fd)
         fds[1].events = POLLIN;
 
         while (1) {
-                ret = poll(fds, 2, -1);
+                ret = poll(fds, 2, TIMEOUT_MS);
 
-                if (ret < 0)
+                if (ret <= 0){
+                        if(ret < 0){
+                                perror("[!] Error: poll() failed.\n");
+                        } else {
+                                perror("[*] Warning: a connection timed out.\n");
+                        }
                         break;
+                }
 
                 if (fds[0].revents & POLLIN) {
                         bytes_read = SSL_read(ssl_socket, buffer, BUFFER_SIZE);

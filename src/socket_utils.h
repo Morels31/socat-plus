@@ -3,6 +3,7 @@
 
 #define BUFFER_SIZE 16384
 #define MAX_CLIENTS 50
+#define TIMEOUT_MS 30000
 
 #include <netinet/in.h>
 #include <openssl/ssl.h>
