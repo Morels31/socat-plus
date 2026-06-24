@@ -28,4 +28,4 @@ $(OUTDIR):
 .PHONY: clean
 
 clean:
-	rm -f $(TARGET) *.o
+	rm -rf $(TARGET) $(OUTDIR)
